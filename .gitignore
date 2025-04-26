@@ -1,0 +1,44 @@
+# Built artifacts
+*.apk
+*.aar
+*.ap_
+*.aab
+*.dex
+*.class
+
+# Build directories
+build/
+app/build/
+bin/
+gen/
+out/
+.release/
+/release/
+
+# Gradle
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Local configs
+local.properties
+google-services.json
+
+# Keystores
+*.jks
+*.keystore
+
+# IDE
+.idea/
+*.iml
+.navigation/
+.cxx/
+captures/
+
+# System
+.DS_Store
+Thumbs.db
+
+# Logs/profiles
+*.log
+app/*.hprof
