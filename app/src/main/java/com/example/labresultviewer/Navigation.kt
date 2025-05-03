@@ -1,11 +1,15 @@
-package com.example.labresultviewer
+sealed class Screen(val route: String, val showBottomBar: Boolean) {
+    // Auth screens (no bottom bar)
+    object Welcome : Screen("welcome", false)
+    object Login : Screen("login", false)
+    object CreateAccount : Screen("create_account", false)
+    object CreateProfile : Screen("create_profile", false)
+    object ForgotPassword : Screen("forgot_password", false)
+    object Success : Screen("success", false)
 
-sealed class Screen(val route: String) {
-    object Welcome : Screen("welcome")
-    object CreateAccount : Screen("create_account")
-    object Login : Screen("login")
-    object CreateProfile : Screen("create_profile")
-    object Home : Screen("home")
-    object ForgotPassword : Screen("forgot_password")
-    // Add other screens here
+    // Main app screens (with bottom bar)
+    object Home : Screen("home", true)
+    object LabResults : Screen("lab_results", true)
+    object Appointments : Screen("appointments", true)
+    object Profile : Screen("profile", true)
 }

@@ -37,6 +37,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
@@ -52,32 +53,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-fun HomeScreen(userName: String = "Abebech") {
+fun HomeScreen(userName: String = "Abebech", ) {
     var search by remember { mutableStateOf("") }
     // Placeholder values for now, to be replaced with backend data
     var totalTests by remember { mutableStateOf(2) }
     var abnormalResults by remember { mutableStateOf(1) }
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-                    label = { Text("Home") },
-                    selected = true,
-                    onClick = { /* TODO */ }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.AccountCircle, contentDescription = "Profile", ) },
-                    label = { Text("Profile") },
-                    selected = false,
-                    onClick = { /* TODO */ }
-                )
-            }
-        }
-    ) { padding ->
         Column(
             modifier = Modifier
-                .padding(padding)
                 .padding(18.dp)
                 .fillMaxSize()
         ) {
@@ -171,5 +153,4 @@ fun HomeScreen(userName: String = "Abebech") {
             }
         }
     }
-}
 

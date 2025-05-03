@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.kapt)
 }
 
 android {
@@ -30,6 +33,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -45,13 +49,27 @@ android {
 }
 
 dependencies {
+    // Core desugaring
+    coreLibraryDesugaring(libs.android.desugarJdkLibs)
+
+    // Hilt (add these)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
+
+    // Network
+    implementation(libs.retrofit)
+    implementation(libs.gsonConverter)
+    implementation(libs.okhttpLogging)
+
+    // AndroidX
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat) // Add this in your toml as needed
+    implementation(libs.androidx.appcompat)
 
     // Compose BOM
     implementation(platform(libs.androidx.compose.bom))
 
-    // Compose libraries (no versions needed, BOM handles it)
+    // Compose
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
@@ -59,16 +77,24 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.material.icons.extended)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.navigation.compose)
 
-    // Test
+    // Ads
+    implementation(libs.ads.mobile.sdk)
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
 
+    // Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+
+kapt {
+    correctErrorTypes = true
+}
+
