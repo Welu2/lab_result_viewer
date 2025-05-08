@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
@@ -114,8 +113,8 @@ fun AppointmentsScreen() {
                 Text("List of Appointments", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                 Button(
                     onClick = {
-                        isReschedule = false; editIndex = -1;
-                        selectedTest = ""; selectedTime = ""; selectedDate = "$day/${month+1}/$year";
+                        isReschedule = false; editIndex = -1
+                        selectedTest = ""; selectedTime = ""; selectedDate = "$day/${month+1}/$year"
                         showScheduleDialog = true
                     },
                     shape = RoundedCornerShape(20.dp),
@@ -140,8 +139,8 @@ fun AppointmentsScreen() {
                                 AppointmentItem(
                                     appointment = appt,
                                     onReschedule = {
-                                        isReschedule = true; editIndex = idx;
-                                        selectedTest = appt.testName; selectedDate = appt.date; selectedTime = appt.time;
+                                        isReschedule = true; editIndex = idx
+                                        selectedTest = appt.testName; selectedDate = appt.date; selectedTime = appt.time
                                         showScheduleDialog = true
                                     },
                                     onCancel = {
