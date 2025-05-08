@@ -38,6 +38,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.MonitorHeart
@@ -57,6 +58,8 @@ fun HomeScreen(userName: String = "Abebech") {
     // Placeholder values for now, to be replaced with backend data
     var totalTests by remember { mutableStateOf(2) }
     var abnormalResults by remember { mutableStateOf(1) }
+    var currentTab by remember { mutableStateOf("home") }
+
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -65,6 +68,14 @@ fun HomeScreen(userName: String = "Abebech") {
                     label = { Text("Home") },
                     selected = true,
                     onClick = { /* TODO */ }
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Filled.CalendarToday, contentDescription = "Appointments") },
+                    label = { Text("Appointments") },
+                    selected = currentTab == "appointments",
+                    onClick = {
+                        currentTab = "appointments"
+                    }
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Filled.AccountCircle, contentDescription = "Profile", ) },
@@ -172,4 +183,3 @@ fun HomeScreen(userName: String = "Abebech") {
         }
     }
 }
-

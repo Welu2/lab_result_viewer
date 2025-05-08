@@ -14,6 +14,7 @@ import com.example.labresultviewer.ui.CreateProfileScreen
 import com.example.labresultviewer.ui.WelcomeScreen
 import com.example.labresultviewer.ui.theme.LabResultViewerTheme
 import com.example.labresultviewer.Screen.*
+import com.example.labresultviewer.ui.AppointmentsScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,10 +23,9 @@ class MainActivity : ComponentActivity() {
             LabResultViewerTheme(darkTheme = false) {
                 AppNavigation()
             }
-            }
         }
     }
-
+}
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -63,6 +63,10 @@ fun AppNavigation() {
         composable(Home.route) {
             HomeScreen()
         }
+        composable(Appointments.route) {
+            AppointmentsScreen()
+        }
+
     }
 }
 

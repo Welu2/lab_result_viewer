@@ -43,11 +43,9 @@ android {
         kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
 }
-
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat) // Add this in your toml as needed
-
+    implementation(libs.androidx.appcompat)
     // Compose BOM
     implementation(platform(libs.androidx.compose.bom))
 
