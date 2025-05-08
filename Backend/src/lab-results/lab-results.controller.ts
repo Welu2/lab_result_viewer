@@ -179,7 +179,7 @@ export class LabResultsController {
       throw new UnauthorizedException('User ID not found');
     }
 
-    // Fetch the file path for the download
+    // Fetch the file path for the download 
     const filePath = await this.labResultsService.getDownloadPath(
       labResultId,
       userId,
