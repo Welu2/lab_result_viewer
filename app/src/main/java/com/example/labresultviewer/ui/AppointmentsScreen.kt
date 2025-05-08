@@ -290,7 +290,9 @@ fun AppointmentsScreen() {
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showCancelConfirmDialog = false }) {
+                    TextButton(onClick = { showCancelConfirmDialog = false },
+                        modifier = Modifier.fillMaxWidth()
+                        ) {
                         Text("No, keep")
                     }
                 }
