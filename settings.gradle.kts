@@ -1,3 +1,5 @@
+// --- PLUGIN MANAGEMENT CONFIGURATION ---
+// This block defines where Gradle should look for plugins (e.g., Android Gradle Plugin, Kotlin plugins).
 pluginManagement {
     repositories {
         google {
