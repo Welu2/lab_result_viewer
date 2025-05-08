@@ -34,7 +34,6 @@ data class Appointment(
     val notes: String = ""
 )
 
-// No initial appointments
 private val sampleAppointments = emptyList<Appointment>()
 
 @OptIn(ExperimentalMaterial3Api::class)
