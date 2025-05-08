@@ -46,9 +46,24 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
+    android {
+        packaging {
+            resources {
+                excludes.add("META-INF/INDEX.LIST")
+                excludes.add("META-INF/DEPENDENCIES")
+                excludes.add("META-INF/io.netty.versions.properties")
+                excludes.add("META-INF/LICENSE")
+                excludes.add("META-INF/LICENSE.txt")
+                excludes.add("META-INF/NOTICE")
+                excludes.add("META-INF/NOTICE.txt")
+            }
+        }
+    }
 }
 
 dependencies {
+    implementation(libs.firebase.appdistribution.gradle)
+    implementation(libs.androidx.runtime.livedata)
     // Core desugaring
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
 

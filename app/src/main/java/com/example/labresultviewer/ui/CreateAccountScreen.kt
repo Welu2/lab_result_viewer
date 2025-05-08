@@ -1,5 +1,6 @@
 package com.example.labresultviewer.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -19,11 +20,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.labresultviewer.viewmodel.AuthViewModel
+import com.example.labresultviewer.viewmodel.Resource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateAccountScreen(
-    onCreateClick: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel(),
+    onSuccess: () -> Unit,
     onLoginClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -36,6 +41,30 @@ fun CreateAccountScreen(
     val hasMinLength = remember { derivedStateOf { password.length >= 8 } }
     val hasSpecialChar = remember { derivedStateOf { password.contains(Regex("[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]")) } }
     val hasUppercase = remember { derivedStateOf { password.contains(Regex("[A-Z]")) } }
+
+    val registrationState by viewModel.registrationState.collectAsState()
+
+    when (registrationState) {
+        is AuthViewModel.RegistrationResult.Success -> {
+            Log.d("Registration", "Signup was successful! State changed.")
+            LaunchedEffect(registrationState) {
+                Log.d("Navigation", "Navigating to Success screen.")
+                onSuccess()
+            }
+        }
+        is AuthViewModel.RegistrationResult.Error -> {
+            val error = (registrationState as AuthViewModel.RegistrationResult.Error).message
+            Log.e("Registration", "Signup error: $error")
+        }
+        is AuthViewModel.RegistrationResult.Loading -> {
+            Log.d("Registration", "Signup is in progress...")
+        }
+        AuthViewModel.RegistrationResult.Idle -> {
+            Log.d("Registration", "Waiting for user action.")
+        }
+    }
+
+
 
     Scaffold(
         topBar = {
@@ -140,13 +169,22 @@ fun CreateAccountScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Button(
-                    onClick = onCreateClick,
+                    onClick = {
+                        if (password == confirmPassword) {
+                            viewModel.register(email, password)
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     enabled = hasMinLength.value && hasSpecialChar.value && hasUppercase.value && password == confirmPassword && email.isNotEmpty()
                 ) {
-                    Text("Create an account")
+                    if (registrationState is AuthViewModel.RegistrationResult.Loading) {
+                        CircularProgressIndicator(color = Color.White)
+                    } else {
+                        Text("Create an account")
+                    }
                 }
+
             }
 
             Box(

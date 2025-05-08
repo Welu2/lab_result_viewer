@@ -19,9 +19,9 @@ export class AuthService {
       return null; // User not found, return null
     }
 
-   
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    
+
 
     if (isPasswordValid) {
       // Return the user excluding password
@@ -38,7 +38,7 @@ export class AuthService {
     }
 
     // Invalid password
-  
+
 
   // Login method to generate JWT token
   async login(user: any) {
@@ -63,7 +63,7 @@ export class AuthService {
       );
     }
 
-    
+
 
     // Create the user with the provided email and hashed password
     const newUser = await this.usersService.createUser(email, password);
@@ -74,10 +74,14 @@ export class AuthService {
       sub: newUser.id,
       role: newUser.role,
     };
-    const token = this.jwtService.sign(payload); // Sign the token
 
-    return { user: newUser, token }; // Return user and token
-  }
+    return {
+      user: newUser,
+      token: {
+        access_token: this.jwtService.sign(payload)
+      }
+    };
+}
 
   // Delete user account by user ID
   async deleteAccount(patientId: string, currentUser: any) {

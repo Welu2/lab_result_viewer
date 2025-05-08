@@ -16,6 +16,8 @@ retrofit = "2.9.0"
 okhttp = "4.9.3"
 hilt = "2.48"
 hiltNavigationCompose = "1.2.0"
+firebaseAppdistributionGradle = "5.1.1"
+runtimeLivedata = "1.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,6 +46,8 @@ android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+firebase-appdistribution-gradle = { group = "com.google.firebase", name = "firebase-appdistribution-gradle", version.ref = "firebaseAppdistributionGradle" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
 
 [plugins]

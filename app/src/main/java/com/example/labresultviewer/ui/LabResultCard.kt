@@ -1,8 +1,6 @@
 package com.example.labresultviewer.ui
 
-
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -16,22 +14,26 @@ import androidx.compose.ui.unit.sp
 import com.example.labresultviewer.model.LabResult
 
 @Composable
-fun LabResultCard(result: LabResult) {
+fun LabResultCard(result: LabResult, onView: () -> Unit = {}, onDownload: () -> Unit = {}) {
     Card(
         elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text(text = result.testName, fontSize = 12.sp)
-            Text(text = result.date, fontSize = 10.sp)
-            Text(text = result.status, fontSize = 10.sp, color = MaterialTheme.colorScheme.primary)
+            Text(text = result.title, fontSize = 16.sp)
+            if (!result.reportDate.isNullOrBlank())
+                Text(text = result.reportDate, fontSize = 12.sp)
+            if (!result.reportType.isNullOrBlank())
+                Text(text = result.reportType, fontSize = 12.sp)
+            if (!result.status.isNullOrBlank())
+                Text(text = result.status, fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Button(onClick = { /* TODO: view report */ }) {
+                Button(onClick = onView) {
                     Text("View Report")
                 }
                 Spacer(Modifier.width(8.dp))
-                OutlinedButton(onClick = { /* TODO: download PDF */ }) {
+                OutlinedButton(onClick = onDownload, enabled = !result.downloadUrl.isNullOrBlank()) {
                     Text("Download")
                 }
             }

@@ -12,4 +12,9 @@ sealed class Screen(val route: String, val showBottomBar: Boolean) {
     object LabResults : Screen("lab_results", true)
     object Appointments : Screen("appointments", true)
     object Profile : Screen("profile", true)
+    object AdminDashboard : Screen("admin_dashboard", true)
+    object Patients : Screen("patients", true)
+    object UploadLabReport : Screen("upload_lab_report", true)
+    object AppointmentsApproval : Screen("appointments_approval", true)
+    object LabResultsManagement : Screen("lab_results_management", true)
 }

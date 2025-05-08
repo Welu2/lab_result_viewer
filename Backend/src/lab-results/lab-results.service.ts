@@ -109,6 +109,14 @@ export class LabResultsService {
     return result;
   }
 
+  // ADMIN: Get all lab results
+  async findAll(): Promise<LabResult[]> {
+    return this.labResultRepo.find({
+      relations: ['user.profile'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   // Other CRUD operations (update, remove, etc.) remain as needed
 
   async update(

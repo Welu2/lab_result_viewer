@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,12 +39,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.labresultviewer.R
+import com.example.labresultviewer.model.CreateProfileRequest
+import com.example.labresultviewer.viewmodel.CreateProfileViewModel
 import java.io.FileNotFoundException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateProfileScreen(onCreateClick: () -> Unit, onBackClick:()->Unit) {
+fun CreateProfileScreen(onCreateClick: () -> Unit, onBackClick:()->Unit, createProfileViewModel: CreateProfileViewModel= hiltViewModel()) {
     var fullName by remember { mutableStateOf("") }
     var dob by remember { mutableStateOf("") }
     var height by remember { mutableStateOf("") }
@@ -71,6 +77,33 @@ fun CreateProfileScreen(onCreateClick: () -> Unit, onBackClick:()->Unit) {
     val cardOverlap = 200.dp
     val imageSize = 100.dp
     val imageOverlap = imageSize * 1f
+
+    val createProfileAction = {
+        val createProfileRequest = CreateProfileRequest(
+            name = fullName,
+            dateOfBirth = dob,
+            gender = gender.lowercase(),
+            weight = weight.toDoubleOrNull(),
+            height = height.toDoubleOrNull(),
+            bloodType = bloodGroup,
+            phoneNumber = "" // Add phone number input if needed
+        )
+
+        createProfileViewModel.createProfile(createProfileRequest)
+    }
+
+    // Observe ViewModel state
+    val profileCreationState by createProfileViewModel.createProfileState.observeAsState()
+
+    LaunchedEffect(profileCreationState) {
+        if (profileCreationState?.isSuccess == true) {
+            Log.d("CreateProfile", "Profile successfully created! Navigating to Home.") // ✅ Debug log
+            Toast.makeText(context, "Profile Created!", Toast.LENGTH_SHORT).show()
+            onCreateClick() // ✅ Navigate to Home
+        }
+    }
+
+
 
     Box(
         modifier = Modifier
@@ -300,7 +333,7 @@ fun CreateProfileScreen(onCreateClick: () -> Unit, onBackClick:()->Unit) {
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
-                    onClick = onCreateClick,
+                    onClick = {createProfileAction()},
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 ) {

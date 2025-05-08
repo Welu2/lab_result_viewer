@@ -1,3 +1,4 @@
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -11,11 +12,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.labresultviewer.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onLoginClick: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel(),
+    onLoginSuccess: () -> Unit,
     onCreateAccountClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
     onBackClick: () -> Unit
@@ -25,6 +29,24 @@ fun LoginScreen(
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var rememberMe by remember { mutableStateOf(false) }
+    val loginState by viewModel.loginState.collectAsState()
+
+    LaunchedEffect(loginState) {
+        Log.d("LoginScreen", "LaunchedEffect triggered: $loginState")
+
+        when (loginState) {
+            is AuthViewModel.AuthResult.Success -> {
+                Log.d("LoginScreen", "Login successful. Navigating to Home.")
+                if (rememberMe) {
+                    // Save credentials
+                }
+                onLoginSuccess() // this should navigate
+            }
+            is AuthViewModel.AuthResult.Error -> {
+            }
+            else -> Log.d("LoginScreen", "Login state: $loginState")
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -110,7 +132,9 @@ fun LoginScreen(
                     onClick = {
                         emailError = email.isBlank()
                         passwordError = password.isBlank()
-                        if (!emailError && !passwordError) onLoginClick()
+                        if (!emailError && !passwordError) {
+                            viewModel.login(email, password)
+                        }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),

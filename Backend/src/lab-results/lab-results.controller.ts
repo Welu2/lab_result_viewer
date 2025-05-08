@@ -60,9 +60,10 @@ export class LabResultsController {
   upload(
     @Param('patientId') patientId: string,
     @UploadedFile() file: Express.Multer.File,
+    @Body() body: { testType: string },
   ) {
     return this.labResultsService.createForPatient(patientId, {
-      title: 'Lab Result',
+      title: body.testType || 'Lab Result', // Use testType from frontend, fallback to 'Lab Result'
       description: 'Uploaded lab result',
       filePath: file.path,
     });
@@ -137,6 +138,12 @@ export class LabResultsController {
     }
     const userId = req.user['id'];
     return this.labResultsService.findAllByUser(userId);
+  }
+
+  @Get('admin')
+  @Roles('admin')
+  getAllForAdmin() {
+    return this.labResultsService.findAll();
   }
 
   // USER: Get a specific result if it belongs to them
