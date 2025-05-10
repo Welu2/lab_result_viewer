@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+     // Composable function responsible for setting up navigation between screens
     @Composable
     fun AppNavigation() {
         val navController = rememberNavController()
@@ -142,6 +142,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+             // Lab Results Management screen: admin can manage lab results here
             composable(Screen.LabResultsManagement.route){
                 MainAppScaffold(
                     showBottomBar = Screen.LabResultsManagement.showBottomBar,
