@@ -378,7 +378,7 @@ fun CreateProfileScreen(onCreateClick: () -> Unit, onBackClick:()->Unit, createP
         }
     }
 }
-
+// Helper function to load a Bitmap from a URI
 fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap? {
     return try {
         MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
