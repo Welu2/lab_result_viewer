@@ -122,6 +122,7 @@ fun CreateAccountScreen(
                     shape = RoundedCornerShape(20.dp),
                     visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
+                        // Icon to toggle password visibility
                         IconButton(onClick = { showPassword = !showPassword }) {
                             Icon(
                                 imageVector = if (showPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff,
