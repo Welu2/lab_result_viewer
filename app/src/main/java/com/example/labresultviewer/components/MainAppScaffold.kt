@@ -11,6 +11,7 @@ import androidx.navigation.NavController
 fun MainAppScaffold(
     showBottomBar: Boolean,
     navController: NavController,
+    userRole: String?,
     modifier: Modifier = Modifier,
     content: @Composable (PaddingValues) -> Unit
 ) {
@@ -18,11 +19,13 @@ fun MainAppScaffold(
         modifier = modifier,
         bottomBar = {
             if (showBottomBar) {
-                AppBottomBar(navController)
+                when (userRole) {
+                    "admin" -> AdminBottomBar(navController)
+                    "user" -> AppBottomBar(navController)
+                }
             }
         }
     ) { paddingValues ->
         content(paddingValues)
     }
 }
-
