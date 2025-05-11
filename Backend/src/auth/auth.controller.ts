@@ -7,15 +7,23 @@ import {
   Get,
   UseGuards,
 } from '@nestjs/common';
+
 import { AuthService } from './auth.service';
+
 import { UsersService } from '../users/users.service';
+
 import { JwtAuthGuard } from './jwt-auth.guard';
+
 import { RolesGuard } from './roles.guard';
+
 import { Roles } from './roles.decorator';
+
 import { Role } from '../users/user.entity';
+
 import { CurrentUser } from './current-user.decorator';
 
 @Controller('auth')
+
 export class AuthController {
   constructor(
     private authService: AuthService,
@@ -23,7 +31,9 @@ export class AuthController {
   ) {}
 
   // Signup Route
+
   @Post('signup')
+
   async signup(@Body() body: any) {
     if (
       !body ||
@@ -33,7 +43,9 @@ export class AuthController {
     ) {
       return { message: 'Email and password are required in the request body' };
     }
+
     const { email, password } = body;
+
     try {
       const { user, token } = await this.authService.signup(email, password); // Ensure token is returned
       return { user, token }; // Return user and token
@@ -43,10 +55,12 @@ export class AuthController {
   }
 
   // Login Route
+
   @Post('login')
   async login(@Body() body: { email: string; password: string }) {
     const { email, password } = body;
     const user = await this.authService.validateUser(email, password);
+
     if (!user) {
       return { message: 'Invalid credentials' };
     }
@@ -55,16 +69,24 @@ export class AuthController {
   }
 
   // Get All Users - Only Admins
+
   @Get('users')
+
   @UseGuards(JwtAuthGuard, RolesGuard)
+
   @Roles(Role.ADMIN) // Only admins can access
+
   async getAllUsers(@CurrentUser() user: any) {
+
     return await this.usersService.findAll(user); // Pass currentUser here
   }
 
   // Get Own User Data - Any logged-in user
+
   @Get('user/:id')
+
   @UseGuards(JwtAuthGuard)
+
   async getUserData(@Param('id') patientId: string, @CurrentUser() user: any) {
     if (user.patientId !== patientId && user.role !== Role.ADMIN) {
       return {
@@ -75,10 +97,15 @@ export class AuthController {
   }
 
   // Delete Account - Only own account or Admin
+
   @Delete('delete/:id')
+
   @UseGuards(JwtAuthGuard)
+
   async deleteAccount(
+
     @Param('id') patientId: string,
+    
     @CurrentUser() user: any,
   ) {
     if (user.patientId !== patientId && user.role !== Role.ADMIN) {
