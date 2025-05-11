@@ -17,4 +17,6 @@ sealed class Screen(val route: String, val showBottomBar: Boolean) {
     object UploadLabReport : Screen("upload_lab_report", true)
     object AppointmentsApproval : Screen("appointments_approval", true)
     object LabResultsManagement : Screen("lab_results_management", true)
+    object AppointmentsScreen : Screen("appointments_screen", true)
+    object Settings : Screen("settings", true)
 }

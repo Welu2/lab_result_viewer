@@ -15,28 +15,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.labresultviewer.data.getDummyAppointmentsPast
-import com.example.labresultviewer.data.getDummyAppointmentsToday
-import com.example.labresultviewer.data.getDummyAppointmentsUpcoming
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.labresultviewer.viewmodel.AdminAppointmentsViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppointmentScreen() {
+fun AppointmentScreen(
+    viewModel: AdminAppointmentsViewModel = hiltViewModel(),
+    onBack: () -> Unit = {}
+) {
+
     val tabs = listOf("Today", "Upcoming", "Past")
     var selectedTabIndex by remember { mutableStateOf(0) }
 
-    val appointments = when (selectedTabIndex) {
-        0 -> getDummyAppointmentsToday()
-        1 -> getDummyAppointmentsUpcoming()
-        else -> getDummyAppointmentsPast()
+    val todayAppointments by viewModel.todayAppointments.collectAsState()
+    val upcomingAppointments by viewModel.upcomingAppointments.collectAsState()
+    val pastAppointments by viewModel.pastAppointments.collectAsState()
+    val loading by viewModel.loading.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadAppointments()
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-
         TopAppBar(
             title = { Text("Appointments", fontWeight = FontWeight.Bold) },
             navigationIcon = {
-                IconButton(onClick = { /* TODO: Handle back */ }) {
+                IconButton(onClick = onBack) {
                     Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
                 }
             },
@@ -59,14 +66,25 @@ fun AppointmentScreen() {
 
         FilterRow()
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(appointments) { appointment ->
-                AppointmentCard(appointment)
+        if (loading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                val appointments = when (selectedTabIndex) {
+                    0 -> todayAppointments
+                    1 -> upcomingAppointments
+                    else -> pastAppointments
+                }
+                items(appointments) { appointment ->
+                    AppointmentCard(appointment)
+                }
             }
         }
     }
@@ -88,7 +106,9 @@ fun FilterRow() {
                 tint = Color.Gray
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("May 17, 2023", color = Color.Gray)
+            val today = LocalDate.now()
+            val formattedDate = today.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
+            Text(formattedDate, color = Color.Gray)
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -101,10 +121,4 @@ fun FilterRow() {
             Text("Filter", color = Color.Gray)
         }
     }
-}
-
-@Preview
-@Composable
-fun AppointmentScreenPreview() {
-    AppointmentScreen()
 }

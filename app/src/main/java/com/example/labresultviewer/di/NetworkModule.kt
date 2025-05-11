@@ -5,6 +5,7 @@ import com.example.labresultviewer.network.AdminLabResultService
 import com.example.labresultviewer.network.ApiService
 import com.example.labresultviewer.network.AuthService
 import com.example.labresultviewer.network.LabResultService
+import com.example.labresultviewer.network.NotificationService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -67,5 +68,11 @@ object NetworkModule {
     @Singleton
     fun provideAdminLabResultService(retrofit: Retrofit): AdminLabResultService {
         return retrofit.create(AdminLabResultService::class.java)
+    }
+    @Provides
+    @Singleton
+    fun provideNotificationService(retrofit: Retrofit): NotificationService {
+        return retrofit.create(NotificationService::class.java)
+
     }
 }

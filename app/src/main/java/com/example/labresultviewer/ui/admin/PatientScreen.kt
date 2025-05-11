@@ -39,11 +39,14 @@ import com.example.labresultviewer.viewmodel.PatientViewModel
 @Composable
 fun PatientsScreen(
     viewModel: PatientViewModel = hiltViewModel(),
-    navController: NavController,
-    onAddPatient: () -> Unit = {},
-    onEditPatient: (UserProfile) -> Unit = {},
-    onViewProfile: (UserProfile) -> Unit = {}
+    navController: NavController
 ) {
+    var showAddModal by remember { mutableStateOf(false) }
+    var showEditModal by remember { mutableStateOf(false) }
+    var showViewModal by remember { mutableStateOf(false) }
+    var selectedPatient by remember { mutableStateOf<UserProfile?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+
     // Load patients when screen first appears
     LaunchedEffect(Unit) {
         viewModel.loadPatients()
@@ -52,16 +55,23 @@ fun PatientsScreen(
     val patients = viewModel.patients
     val isLoading by remember { viewModel.isLoading }
     val error by remember { viewModel.error }
-    var searchQuery by remember { mutableStateOf("") }
 
-    val filteredPatients = patients
+    val filteredPatients = if (searchQuery.isBlank()) {
+        patients
+    } else {
+        patients.filter { patient ->
+            patient.name.contains(searchQuery, ignoreCase = true) ||
+            patient.patientId.contains(searchQuery, ignoreCase = true) ||
+            patient.user.email.contains(searchQuery, ignoreCase = true)
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Patients", fontWeight = FontWeight.Bold) },
                 actions = {
-                    IconButton(onClick = onAddPatient) {
+                    IconButton(onClick = { showAddModal = true }) {
                         Icon(Icons.Default.Add, contentDescription = "Add Patient")
                     }
                 },
@@ -115,8 +125,14 @@ fun PatientsScreen(
                         items(filteredPatients) { patient ->
                             PatientCard(
                                 patient = patient,
-                                onEdit = { onEditPatient(patient) },
-                                onViewProfile = { onViewProfile(patient) }
+                                onEdit = {
+                                    selectedPatient = patient
+                                    showEditModal = true
+                                },
+                                onViewProfile = {
+                                    selectedPatient = patient
+                                    showViewModal = true
+                                }
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                         }
@@ -124,6 +140,37 @@ fun PatientsScreen(
                 }
             }
         }
+    }
+
+    // Add Patient Modal
+    if (showAddModal) {
+        AddPatientModal(
+            onDismiss = { showAddModal = false },
+            onAdd = { patientData ->
+                viewModel.addPatient(patientData)
+                showAddModal = false
+            }
+        )
+    }
+
+    // Edit Patient Modal
+    if (showEditModal && selectedPatient != null) {
+        EditPatientModal(
+            patient = selectedPatient!!,
+            onDismiss = { showEditModal = false },
+            onEdit = { patientData ->
+                viewModel.editPatient(selectedPatient!!.id.toString(), patientData)
+                showEditModal = false
+            }
+        )
+    }
+
+    // View Patient Modal
+    if (showViewModal && selectedPatient != null) {
+        ViewPatientProfileModal(
+            patient = selectedPatient!!,
+            onDismiss = { showViewModal = false }
+        )
     }
 }
 

@@ -16,16 +16,49 @@ class AuthRepository @Inject constructor(
     suspend fun login(email: String, password: String): Result<UserWithToken> {
         return try {
             val response = service.login(LoginRequest(email, password))
+            Log.d("AuthRepository", "Login response code: ${response.code()}")
+            Log.d("AuthRepository", "Login response body: ${response.body()}")
+            Log.d("AuthRepository", "Login error body: ${response.errorBody()?.string()}")
+            
             if (response.isSuccessful) {
                 response.body()?.let { authResponse ->
+                    Log.d("AuthRepository", "Auth response: $authResponse")
                     val token = authResponse.token.accessToken
+                    
+                    // Extract role from JWT token
+                    val role = try {
+                        val parts = token.split(".")
+                        if (parts.size == 3) {
+                            val payload = parts[1]
+                            val decodedPayload = String(android.util.Base64.decode(payload, android.util.Base64.DEFAULT))
+                            val jsonObject = org.json.JSONObject(decodedPayload)
+                            jsonObject.getString("role")
+                        } else {
+                            // Fallback to email check if JWT parsing fails
+                            if (email.contains("@pulse.org")) "admin" else "user"
+                        }
+                    } catch (e: Exception) {
+                        Log.e("AuthRepository", "Error parsing JWT token", e)
+                        // Fallback to email check
+                        if (email.contains("@pulse.org")) "admin" else "user"
+                    }
+                    
+                    Log.d("AuthRepository", "User role: $role")
+                    
                     sessionManager.saveToken(token)
-                    Result.success(UserWithToken(token = token))
-                } ?: Result.failure(Exception("Empty response"))
+                    sessionManager.saveUserRole(role)
+                    Result.success(UserWithToken(token = token, role = role))
+                } ?: run {
+                    Log.e("AuthRepository", "Response body is null")
+                    Result.failure(Exception("Empty response"))
+                }
             } else {
-                Result.failure(Exception("Login failed: ${response.code()}"))
+                val errorBody = response.errorBody()?.string()
+                Log.e("AuthRepository", "Login failed: ${response.code()} - $errorBody")
+                Result.failure(Exception("Login failed: ${response.code()} - $errorBody"))
             }
         } catch (e: Exception) {
+            Log.e("AuthRepository", "Login error", e)
             Result.failure(e)
         }
     }
@@ -41,13 +74,23 @@ class AuthRepository @Inject constructor(
             if (response.isSuccessful) {
                 response.body()?.let { authResponse ->
                     val token = authResponse.token.accessToken
-                    sessionManager.saveToken(token)
-                    Result.success(UserWithToken(token = token))
+                    val user = authResponse.user
+                    if (user != null) {
+                        val role = user.role
+                        sessionManager.saveToken(token)
+                        sessionManager.saveUserRole(role)
+                        Result.success(UserWithToken(token = token, role = role))
+                    } else {
+                        Result.failure(Exception("User data is missing from response"))
+                    }
                 } ?: Result.failure(Exception("Empty response"))
             } else {
-                Result.failure(Exception("Registration failed: ${response.code()}"))
+                val errorBody = response.errorBody()?.string()
+                Log.e("AuthRepository", "Registration failed: ${response.code()} - $errorBody")
+                Result.failure(Exception("Registration failed: ${response.code()} - $errorBody"))
             }
         } catch (e: Exception) {
+            Log.e("AuthRepository", "Registration error", e)
             Result.failure(e)
         }
     }
@@ -56,5 +99,6 @@ class AuthRepository @Inject constructor(
 
 // Additional model for convenience
 data class UserWithToken(
-    val token: String
+    val token: String,
+    val role: String
 )

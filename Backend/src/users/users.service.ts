@@ -112,4 +112,9 @@ export class UsersService {
     }
     return this.usersRepository.find();
   }
+
+  // Get all users (for internal use, e.g., dashboard aggregation)
+  async getAllUsers(): Promise<User[]> {
+    return this.usersRepository.find();
+  }
 }

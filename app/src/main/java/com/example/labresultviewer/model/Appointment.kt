@@ -5,6 +5,7 @@ data class Appointment(
     val testType: String,
     val date: String,  // Use String if date comes in ISO format from backend
     val time: String,
+    val patientName: String,
     val status: String,
     val patient: User // Assuming there's a User model
 )

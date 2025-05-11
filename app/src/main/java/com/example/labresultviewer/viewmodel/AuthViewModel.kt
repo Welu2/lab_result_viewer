@@ -20,7 +20,7 @@ class AuthViewModel @Inject constructor(
     sealed class AuthResult {
         object Idle : AuthResult()
         object Loading : AuthResult()
-        data class Success(val user: UserWithToken) : AuthResult()
+        data class Success(val userWithToken: UserWithToken) : AuthResult()
         data class Error(val message: String?) : AuthResult()
     }
 
@@ -31,7 +31,7 @@ class AuthViewModel @Inject constructor(
     sealed class RegistrationResult {
         object Idle : RegistrationResult()
         object Loading : RegistrationResult()
-        data class Success(val user: UserWithToken) : RegistrationResult()
+        data class Success(val userWithToken: UserWithToken) : RegistrationResult()
         data class Error(val message: String?) : RegistrationResult()
     }
 

@@ -14,21 +14,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.labresultviewer.viewmodel.AuthViewModel
+import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel = hiltViewModel(),
-    onLoginSuccess: () -> Unit,
     onCreateAccountClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    navController: NavController
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var rememberMe by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     val loginState by viewModel.loginState.collectAsState()
 
     LaunchedEffect(loginState) {
@@ -36,15 +38,37 @@ fun LoginScreen(
 
         when (loginState) {
             is AuthViewModel.AuthResult.Success -> {
-                Log.d("LoginScreen", "Login successful. Navigating to Home.")
+                Log.d("LoginScreen", "Login successful. Navigating based on role.")
                 if (rememberMe) {
                     // Save credentials
                 }
-                onLoginSuccess() // this should navigate
+                val role = (loginState as AuthViewModel.AuthResult.Success).userWithToken.role
+                when (role.lowercase()) {
+                    "admin" -> {
+                        Log.d("LoginScreen", "Admin user, navigating to AdminDashboard")
+                        navController.navigate(Screen.AdminDashboard.route) {
+                            popUpTo(Screen.Login.route) { inclusive = true }
+                        }
+                    }
+                    else -> {
+                        Log.d("LoginScreen", "Regular user, navigating to Home")
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Login.route) { inclusive = true }
+                        }
+                    }
+                }
             }
             is AuthViewModel.AuthResult.Error -> {
+                errorMessage = (loginState as AuthViewModel.AuthResult.Error).message
+                Log.e("LoginScreen", "Login error: $errorMessage")
             }
-            else -> Log.d("LoginScreen", "Login state: $loginState")
+            is AuthViewModel.AuthResult.Loading -> {
+                errorMessage = null
+            }
+            else -> {
+                errorMessage = null
+                Log.d("LoginScreen", "Login state: $loginState")
+            }
         }
     }
 
@@ -80,6 +104,7 @@ fun LoginScreen(
                     onValueChange = {
                         email = it
                         emailError = it.isBlank()
+                        errorMessage = null
                     },
                     label = { Text("Email") },
                     shape = RoundedCornerShape(18.dp),
@@ -98,6 +123,7 @@ fun LoginScreen(
                     onValueChange = {
                         password = it
                         passwordError = it.isBlank()
+                        errorMessage = null
                     },
                     label = { Text("Password") },
                     shape = RoundedCornerShape(18.dp),
@@ -108,6 +134,16 @@ fun LoginScreen(
 
                 if (passwordError) {
                     Text("Password is required", color = Color.Red, fontSize = 12.sp)
+                }
+
+                if (errorMessage != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = errorMessage ?: "",
+                        color = Color.Red,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(5.dp))
@@ -138,27 +174,34 @@ fun LoginScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-
-                    ) {
-                    Text("Log in")
+                    enabled = loginState !is AuthViewModel.AuthResult.Loading
+                ) {
+                    if (loginState is AuthViewModel.AuthResult.Loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text("Log in")
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
             }
-                Box(
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.BottomCenter
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Are you new?", color = Color.Gray, fontSize = 13.sp)
-                        TextButton(onClick = onCreateAccountClick) {
-                            Text("Create an account",fontSize = 13.sp)
-                        }
+                    Text("Are you new?", color = Color.Gray, fontSize = 13.sp)
+                    TextButton(onClick = onCreateAccountClick) {
+                        Text("Create an account", fontSize = 13.sp)
                     }
+                }
             }
         }
     }

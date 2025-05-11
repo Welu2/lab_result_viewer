@@ -86,7 +86,7 @@ export class AppointmentController {
   adminUpdateAppointmentStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { status: 'confirmed' | 'disapproved' },
-  ): Promise<Appointment> {
+  ): Promise<Appointment | null> {
     return this.appointmentService.adminUpdateAppointmentStatus(
       id,
       body.status,

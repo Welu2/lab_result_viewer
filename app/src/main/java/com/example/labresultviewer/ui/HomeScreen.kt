@@ -24,11 +24,24 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.labresultviewer.viewmodel.HomeViewModel
+import com.example.labresultviewer.viewmodel.NotificationViewModel
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.navigation.NavController
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel(),
+    notificationViewModel: NotificationViewModel = hiltViewModel(),
+    navController: NavController
+) {
     var search by remember { mutableStateOf("") }
     val userName by viewModel.profileName.collectAsState()
+    val totalTests by viewModel.totalTests.collectAsState()
+    val unreadCount by notificationViewModel.unreadCount.collectAsState(initial = 0)
+
+    LaunchedEffect(Unit) {
+        notificationViewModel.loadNotifications()
+    }
 
     Column(
         modifier = Modifier
@@ -60,11 +73,23 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                 modifier = Modifier.weight(1f)
             )
 
-            Icon(
-                imageVector = Icons.Outlined.Notifications,
-                contentDescription = "Notifications",
-                Modifier.size(30.dp)
-            )
+            Box {
+                IconButton(onClick = { navController.navigate("notifications") }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Notifications,
+                        contentDescription = "Notifications",
+                        Modifier.size(30.dp)
+                    )
+                }
+                if (unreadCount > 0) {
+                    Box(
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .size(10.dp)
+                            .background(Color.Red, shape = CircleShape)
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -164,11 +189,11 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                 ) {
                     Column {
                         Text("Total Tests", fontSize = 16.sp)
-                        Text("1", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text(totalTests.toString(), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                     Column {
                         Text("Abnormal Results", fontSize = 16.sp)
-                        Text("2", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text("0", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
             }

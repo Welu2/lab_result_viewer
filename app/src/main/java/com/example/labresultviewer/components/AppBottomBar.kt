@@ -2,6 +2,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -33,6 +34,12 @@ fun AppBottomBar(navController: NavController) {
             label = { Text("Appointments") },
             selected = currentRoute == Screen.Appointments.route,
             onClick = { navController.navigate(Screen.Appointments.route) }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Filled.Person, contentDescription = "Lab Results") },
+            label = { Text("Profile") },
+            selected = currentRoute == Screen.Profile.route,
+            onClick = { navController.navigate(Screen.Profile.route)}
         )
     }
 }

@@ -4,10 +4,14 @@ import com.example.labresultviewer.network.AdminAppointmentService
 import com.example.labresultviewer.network.AdminLabResultService
 import com.example.labresultviewer.network.ApiService
 import com.example.labresultviewer.network.LabResultService
+import com.example.labresultviewer.network.NotificationService
 import com.example.labresultviewer.repository.AdminAppointmentsRepository
 import com.example.labresultviewer.repository.AdminLabResultRepository
 import com.example.labresultviewer.repository.LabResultRepository
+import com.example.labresultviewer.repository.NotificationRepository
 import com.example.labresultviewer.repository.PatientRepository
+import com.example.labresultviewer.repository.UserRepository
+import com.example.labresultviewer.repository.UserRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,5 +43,10 @@ object RepositoryModule {
     @Singleton
     fun provideAdminLabResultRepository(service: AdminLabResultService): AdminLabResultRepository {
         return AdminLabResultRepository(service)
+    }
+    @Provides
+    @Singleton
+    fun provideUserRepository(apiService: ApiService): UserRepository {
+        return UserRepositoryImpl(apiService)
     }
 }

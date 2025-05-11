@@ -94,7 +94,7 @@ export class AppointmentService {
   async adminUpdateAppointmentStatus(
     id: number,
     status: 'confirmed' | 'disapproved',
-  ): Promise<Appointment> {
+  ): Promise<Appointment | null> {
     const appointment = await this.appointmentRepository.findOne({
       where: { id },
       relations: ['patient'],
@@ -102,19 +102,28 @@ export class AppointmentService {
     if (!appointment) {
       throw new NotFoundException('Appointment not found');
     }
-
-    if (status === 'confirmed' || status === 'disapproved') {
+  
+    if (status === 'confirmed') {
       appointment.status = status;
       await this.appointmentRepository.save(appointment);
-
-       await this.notificationService.notifyUser(
-         appointment.patient,
-         `Your appointment has been ${status}.`,
-         'appointment_status_update',
-       );
+  
+      await this.notificationService.notifyUser(
+        appointment.patient,
+        `Your appointment has been confirmed.`,
+        'appointment_status_update',
+      );
+      return appointment;
+    } else if (status === 'disapproved') {
+      await this.notificationService.notifyUser(
+        appointment.patient,
+        `Your appointment has been disapproved.`,
+        'appointment_status_update',
+      );
+      // Delete the appointment after notifying the user
+      await this.appointmentRepository.remove(appointment);
+      return null;
     }
-
-    return appointment;
+    return null;
   }
 
   // Delete Appointment (User)

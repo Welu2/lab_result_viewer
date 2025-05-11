@@ -17,5 +17,6 @@ import { AuthModule } from 'src/auth/auth.module';
   ],
   controllers: [LabResultsController],
   providers: [LabResultsService],
+  exports: [LabResultsService],
 })
 export class LabResultsModule {}

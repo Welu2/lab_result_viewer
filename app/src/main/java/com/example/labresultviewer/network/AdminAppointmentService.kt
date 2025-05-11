@@ -16,5 +16,5 @@ interface AdminAppointmentService {
         @Header("Authorization") token: String,
         @Path("id") id: Int,
         @Body status: Map<String, String>
-    ): Response<Appointment>
+    ): Response<Unit>
 }

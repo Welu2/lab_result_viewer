@@ -59,11 +59,27 @@ fun UploadLabReportScreen(
     val reportTypes = listOf("Blood Test", "Urine Test", "X-Ray", "Other")
     val uploadResult by viewModel.uploadResult.collectAsState()
     val loading by viewModel.loading.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         selectedFileUri = uri
+    }
+
+    LaunchedEffect(uploadResult) {
+        uploadResult?.let { result ->
+            if (result.isSuccessful) {
+                snackbarHostState.showSnackbar("Report uploaded successfully!")
+                // Reset form
+                selectedFileUri = null
+                reportDate = ""
+                patientId = ""
+                reportType = ""
+            } else {
+                snackbarHostState.showSnackbar("Failed to upload report: ${result.message()}")
+            }
+        }
     }
 
     Scaffold(
@@ -78,6 +94,7 @@ fun UploadLabReportScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = Color(0xFFF5F5F5)
     ) { padding ->
         Column(
@@ -187,7 +204,14 @@ fun UploadLabReportScreen(
                 Text("Upload Report")
             }
             if (uploadResult != null) {
-                Text("Upload successful!", color = Color.Green, modifier = Modifier.padding(top = 16.dp))
+                if (uploadResult!!.isSuccessful) {
+                    LaunchedEffect(Unit) {
+                        viewModel.sendLabResultToUser(patientId)
+                        snackbarHostState.showSnackbar("Report uploaded and notification sent successfully!")
+                    }
+                } else {
+                    Text("Upload failed!", color = Color.Red, modifier = Modifier.padding(top = 16.dp))
+                }
             }
         }
     }

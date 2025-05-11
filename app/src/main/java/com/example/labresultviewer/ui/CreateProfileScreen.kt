@@ -44,6 +44,8 @@ import com.example.labresultviewer.R
 import com.example.labresultviewer.model.CreateProfileRequest
 import com.example.labresultviewer.viewmodel.CreateProfileViewModel
 import java.io.FileNotFoundException
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,9 +81,10 @@ fun CreateProfileScreen(onCreateClick: () -> Unit, onBackClick:()->Unit, createP
     val imageOverlap = imageSize * 1f
 
     val createProfileAction = {
+        val formattedDob = formatDateToIso(dob)
         val createProfileRequest = CreateProfileRequest(
             name = fullName,
-            dateOfBirth = dob,
+            dateOfBirth = formattedDob,
             gender = gender.lowercase(),
             weight = weight.toDoubleOrNull(),
             height = height.toDoubleOrNull(),
@@ -404,4 +407,19 @@ fun CircularInitial(userName: String) {
             color = Color.White
         )
     }
+}
+
+fun formatDateToIso(input: String): String {
+    // Try to parse "DD/MM/YYYY" or "MM/DD/YYYY" and output "YYYY-MM-DD"
+    val possibleFormats = listOf("dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd")
+    for (format in possibleFormats) {
+        try {
+            val inputFormat = SimpleDateFormat(format, Locale.US)
+            val date = inputFormat.parse(input)
+            val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+            return outputFormat.format(date)
+        } catch (_: Exception) {}
+    }
+    // If parsing fails, return as-is (backend will reject or store as 0000-00-00)
+    return input
 }

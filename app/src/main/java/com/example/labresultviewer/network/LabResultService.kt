@@ -9,7 +9,9 @@ import retrofit2.http.*
 interface LabResultService {
     @GET("/lab-results")
     suspend fun getLabResults(
+        @Header("Authorization") token: String
     ): List<LabResult>
+
     @Multipart
     @POST("/lab-results/upload/{patientId}")
     suspend fun uploadLabReport(
@@ -23,4 +25,10 @@ interface LabResultService {
     suspend fun createLabResult(
         @Body labResult: LabResult
     ): Response<LabResult>
+
+    @POST("/lab-results/send/{patientId}")
+    suspend fun sendLabResultToUser(
+        @Path("patientId") patientId: String,
+        @Header("Authorization") token: String
+    ): Response<Unit>
 }

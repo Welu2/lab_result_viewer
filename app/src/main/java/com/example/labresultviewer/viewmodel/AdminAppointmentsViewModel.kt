@@ -20,8 +20,32 @@ class AdminAppointmentsViewModel @Inject constructor(
     private val _pendingAppointments = MutableStateFlow<List<Appointment>>(emptyList())
     val pendingAppointments: StateFlow<List<Appointment>> = _pendingAppointments
 
+    private val _todayAppointments = MutableStateFlow<List<Appointment>>(emptyList())
+    val todayAppointments: StateFlow<List<Appointment>> = _todayAppointments
+
+    private val _upcomingAppointments = MutableStateFlow<List<Appointment>>(emptyList())
+    val upcomingAppointments: StateFlow<List<Appointment>> = _upcomingAppointments
+
+    private val _pastAppointments = MutableStateFlow<List<Appointment>>(emptyList())
+    val pastAppointments: StateFlow<List<Appointment>> = _pastAppointments
+
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
+
+    fun loadAppointments() {
+        viewModelScope.launch {
+            _loading.value = true
+            val token = sessionManager.getToken()
+            if (token != null) {
+                val allAppointments = repository.getAllAppointments("Bearer $token")
+                val (today, upcoming, past) = repository.filterAppointments(allAppointments)
+                _todayAppointments.value = today
+                _upcomingAppointments.value = upcoming
+                _pastAppointments.value = past
+            }
+            _loading.value = false
+        }
+    }
 
     fun loadPendingAppointments() {
         viewModelScope.launch {
@@ -48,6 +72,7 @@ class AdminAppointmentsViewModel @Inject constructor(
             if (token != null) {
                 repository.updateAppointmentStatus("Bearer $token", id, status)
                 loadPendingAppointments()
+                loadAppointments() // Reload all appointments after status update
             }
         }
     }

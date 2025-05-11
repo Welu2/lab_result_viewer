@@ -56,8 +56,17 @@ export class ProfileService {
 
   async remove(id: number) {
     const profile = await this.findOne(+id);
-    return this.profileRepository.remove(profile);
+    const userId = profile.user.id;
+    
+    // First remove the profile
+    await this.profileRepository.remove(profile);
+    
+    // Then remove the user
+    await this.profileRepository.manager.getRepository(User).delete(userId);
+    
+    return { message: 'Profile and user deleted successfully' };
   }
+
   async findByPatientId(patientId: string) {
     const profile = await this.profileRepository.findOne({
       where: { patientId },

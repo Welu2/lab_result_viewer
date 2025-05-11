@@ -10,6 +10,7 @@ import { Appointment } from './appointment/entities/appointment.entity';
 import { Notification } from './notifications/notification.entity';
 import { LabResultsModule } from './lab-results/lab-results.module';
 import { LabResult } from './lab-results/entities/lab-result.entity';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { LabResult } from './lab-results/entities/lab-result.entity';
     ProfileModule,
     AppointmentModule,
     LabResultsModule,
+    DashboardModule,
   ],
 })
 export class AppModule {}

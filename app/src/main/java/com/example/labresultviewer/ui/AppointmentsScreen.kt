@@ -20,32 +20,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.*
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.labresultviewer.model.Appointment
+import com.example.labresultviewer.viewmodel.PatientViewModel
 
-// Appointment data model
-data class Appointment(
-    val testName: String,
-    val date: String,
-    val time: String,
-    val notes: String = ""
-)
-
-private val sampleAppointments = emptyList<Appointment>()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppointmentsScreen() {
+fun AppointmentsScreen(viewModel: PatientViewModel = hiltViewModel()) {
     val context = LocalContext.current
+    val appointments = viewModel.appointments
+    val bookingResult by viewModel.bookingResult
 
     // Sorting
     var sortBy by remember { mutableStateOf("date") }
     var showSortMenu by remember { mutableStateOf(false) }
-
-    // List of appointments
-    val appointments = remember { mutableStateListOf<Appointment>().apply { addAll(sampleAppointments) } }
 
     // Booking/rescheduling dialog state
     var showScheduleDialog by remember { mutableStateOf(false) }
@@ -77,6 +69,10 @@ fun AppointmentsScreen() {
     val month = calendar.get(Calendar.MONTH)
     val day = calendar.get(Calendar.DAY_OF_MONTH)
 
+    LaunchedEffect(Unit) {
+        viewModel.loadUserAppointments()
+    }
+
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier
@@ -84,33 +80,31 @@ fun AppointmentsScreen() {
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // Title and sort
+            // Title
             Text(
                 "Appointments", fontSize = 28.sp, fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(16.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { showSortMenu = true }) {
-                    Icon(Icons.Default.Sort, contentDescription = "Sort")
-                }
-                DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
-                    DropdownMenuItem(text = { Text("By Name") }, onClick = { sortBy = "name"; showSortMenu = false })
-                    DropdownMenuItem(text = { Text("By Date") }, onClick = { sortBy = "date"; showSortMenu = false })
-                }
-                Spacer(Modifier.width(8.dp))
-                Text("by $sortBy", fontSize = 16.sp)
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // Header + Book button
+            // Sort/filter row + Book button
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("List of Appointments", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    IconButton(onClick = { showSortMenu = true }) {
+                        Icon(Icons.Default.Sort, contentDescription = "Sort")
+                    }
+                    DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
+                        DropdownMenuItem(text = { Text("By Name") }, onClick = { sortBy = "name"; showSortMenu = false })
+                        DropdownMenuItem(text = { Text("By Date") }, onClick = { sortBy = "date"; showSortMenu = false })
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Text("by $sortBy", fontSize = 16.sp)
+                }
                 Button(
                     onClick = {
                         isReschedule = false; editIndex = -1
@@ -118,36 +112,41 @@ fun AppointmentsScreen() {
                         showScheduleDialog = true
                     },
                     shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2ECC71))
-                ) { Text("Book New Appointment", color = Color.White) }
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) { Text("Book New Appointment", color = Color.White, fontSize = 13.sp) }
             }
             Spacer(Modifier.height(8.dp))
-
             // Appointment list or empty
-            Card(shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(4.dp)) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Upcoming Appointments", fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.height(8.dp))
-                    val displayList = if (sortBy == "name") appointments.sortedBy { it.testName } else appointments.sortedBy { it.date }
-                    if (displayList.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                            Text("No appointments found", color = Color.Gray)
-                        }
-                    } else {
-                        LazyColumn {
-                            itemsIndexed(displayList) { idx, appt ->
+            Column(modifier = Modifier.padding(0.dp)) {
+                Text("Upcoming Appointments", fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                val displayList = if (sortBy == "name") appointments.sortedBy { it.testType } else appointments.sortedBy { it.date }
+                if (displayList.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        Text("No appointments found", color = Color.Gray)
+                    }
+                } else {
+                    LazyColumn(contentPadding = PaddingValues(0.dp)) {
+                        itemsIndexed(displayList) { idx, appt ->
+                            Card(
+                                shape = RoundedCornerShape(16.dp),
+                                elevation = CardDefaults.cardElevation(4.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
                                 AppointmentItem(
                                     appointment = appt,
                                     onReschedule = {
                                         isReschedule = true; editIndex = idx
-                                        selectedTest = appt.testName; selectedDate = appt.date; selectedTime = appt.time
+                                        selectedTest = appt.testType; selectedDate = appt.date; selectedTime = appt.time
                                         showScheduleDialog = true
                                     },
                                     onCancel = {
                                         pendingCancelIndex = idx; showCancelConfirmDialog = true
-                                    }
+                                    },
+                                    modifier = Modifier.padding(16.dp)
                                 )
-                                if (idx < displayList.lastIndex) Spacer(Modifier.height(8.dp))
                             }
                         }
                     }
@@ -221,13 +220,8 @@ fun AppointmentsScreen() {
                         onClick = {
                             showScheduleDialog = false
                             if (selectedDate.isNotBlank() && selectedTime.isNotBlank() && (isReschedule || selectedTest.isNotBlank())) {
-                                val appt = Appointment(
-                                    testName = if (isReschedule) appointments[editIndex].testName else selectedTest,
-                                    date = selectedDate,
-                                    time = selectedTime
-                                )
-                                if (isReschedule && editIndex >= 0) appointments[editIndex] = appt else appointments.add(0, appt)
-                                showSuccessDialog = true
+                                // Call backend booking
+                                viewModel.bookAppointment(selectedTest, selectedDate, selectedTime)
                             } else {
                                 showErrorDialog = true
                             }
@@ -242,33 +236,29 @@ fun AppointmentsScreen() {
             )
         }
 
-        // Success dialog
-        if (showSuccessDialog) {
-            AlertDialog(
-                onDismissRequest = { showSuccessDialog = false },
-                title = { Text("Successfully scheduled", fontWeight = FontWeight.Bold) },
-                confirmButton = {
-                    Button(onClick = { showSuccessDialog = false }, modifier = Modifier.fillMaxWidth()) {
-                        Text("Go Home")
+        // Show booking result dialog
+        if (bookingResult != null) {
+            if (bookingResult!!.isSuccessful) {
+                AlertDialog(
+                    onDismissRequest = { viewModel.clearBookingResult() },
+                    title = { Text("Successfully scheduled", fontWeight = FontWeight.Bold) },
+                    confirmButton = {
+                        Button(onClick = { viewModel.clearBookingResult() }, modifier = Modifier.fillMaxWidth()) {
+                            Text("Go Home")
+                        }
                     }
-                }
-            )
-        }
-
-        // Error dialog
-        if (showErrorDialog) {
-            AlertDialog(
-                onDismissRequest = { showErrorDialog = false },
-                title = { Text("Scheduling failed", fontWeight = FontWeight.Bold) },
-                confirmButton = {
-                    Button(
-                        onClick = { showErrorDialog = false; showScheduleDialog = true },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Back to scheduling options")
+                )
+            } else {
+                AlertDialog(
+                    onDismissRequest = { viewModel.clearBookingResult() },
+                    title = { Text("Failed to schedule appointment", fontWeight = FontWeight.Bold) },
+                    confirmButton = {
+                        Button(onClick = { viewModel.clearBookingResult() }, modifier = Modifier.fillMaxWidth()) {
+                            Text("Back to scheduling options")
+                        }
                     }
-                }
-            )
+                )
+            }
         }
 
         // Cancel confirmation
@@ -279,9 +269,16 @@ fun AppointmentsScreen() {
                 confirmButton = {
                     Button(
                         onClick = {
-                            appointments.removeAt(pendingCancelIndex)
-                            showCancelConfirmDialog = false
-                            showCancelSuccessDialog = true
+                            val apptId = appointments.getOrNull(pendingCancelIndex)?.id
+                            if (apptId != null) {
+                                viewModel.deleteAppointment(apptId) { success ->
+                                    showCancelConfirmDialog = false
+                                    showCancelSuccessDialog = success
+                                }
+                            } else {
+                                showCancelConfirmDialog = false
+                                showCancelSuccessDialog = false
+                            }
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -317,38 +314,33 @@ fun AppointmentsScreen() {
 fun AppointmentItem(
     appointment: Appointment,
     onReschedule: () -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(appointment.testName, fontWeight = FontWeight.SemiBold)
+            Text(appointment.testType, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             AssistChip(onClick = {}, label = { Text("Scheduled") }, shape = RoundedCornerShape(12.dp))
         }
-        Spacer(Modifier.height(4.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(16.dp))
-            Spacer(Modifier.width(4.dp))
-            Text(appointment.date, fontSize = 12.sp)
-        }
-        Spacer(Modifier.height(2.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(16.dp))
-            Spacer(Modifier.width(4.dp))
-            Text(appointment.time, fontSize = 12.sp)
-        }
-        if (appointment.notes.isNotBlank()) {
-            Spacer(Modifier.height(4.dp))
-            Text(appointment.notes, fontSize = 12.sp, color = Color.Gray)
-        }
         Spacer(Modifier.height(8.dp))
-        Row {
-            Text("Reschedule", color = Color(0xFF2ECC71), modifier = Modifier.clickable(onClick = onReschedule))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color(0xFF388E3C))
+            Spacer(Modifier.width(6.dp))
+            Text(appointment.date, fontSize = 14.sp)
             Spacer(Modifier.width(16.dp))
-            Text("Cancel", color = Color.Red, modifier = Modifier.clickable(onClick = onCancel))
+            Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color(0xFF388E3C))
+            Spacer(Modifier.width(6.dp))
+            Text(appointment.time, fontSize = 14.sp)
+        }
+        Spacer(Modifier.height(12.dp))
+        Row {
+            Text("Reschedule", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable(onClick = onReschedule))
+            Spacer(Modifier.width(24.dp))
+            Text("Cancel", color = Color.Red, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable(onClick = onCancel))
         }
     }
 }
@@ -389,10 +381,4 @@ fun DropdownMenuField(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewAppointmentsScreen() {
-    MaterialTheme { AppointmentsScreen() }
 }

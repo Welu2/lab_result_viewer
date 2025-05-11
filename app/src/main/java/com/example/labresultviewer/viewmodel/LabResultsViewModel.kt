@@ -20,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LabResultsViewModel @Inject constructor(
     private val repository: LabResultRepository,
-    private val sessionManager: SessionManager
+    val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _labResults = MutableStateFlow<List<LabResult>>(emptyList())
@@ -36,7 +36,13 @@ class LabResultsViewModel @Inject constructor(
         viewModelScope.launch {
             _loading.value = true
             try {
-                _labResults.value = repository.fetchLabResults()
+                val token = sessionManager.getToken()
+                if (token != null) {
+                    val bearerToken = "Bearer $token"
+                    _labResults.value = repository.fetchLabResults(bearerToken)
+                } else {
+                    _labResults.value = emptyList()
+                }
             } catch (e: Exception) {
                 // Handle error (e.g., emit empty list or error message)
                 _labResults.value = emptyList()
@@ -62,6 +68,14 @@ class LabResultsViewModel @Inject constructor(
                 _uploadResult.value = null
             } finally {
                 _loading.value = false
+            }
+        }
+    }
+    fun sendLabResultToUser(patientId: String) {
+        viewModelScope.launch {
+            val token = sessionManager.getToken()
+            if (token != null) {
+                repository.sendLabResultToUser(patientId, "Bearer $token")
             }
         }
     }
