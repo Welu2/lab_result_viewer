@@ -341,8 +341,26 @@ fun AppointmentItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(appointment.testType, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            AssistChip(onClick = {}, label = { Text("Scheduled") }, shape = RoundedCornerShape(12.dp))
-        }
+        AssistChip(
+                onClick = {},
+                label = { 
+                    Text(
+                        when(appointment.status.lowercase()) {
+                            "confirmed" -> "Scheduled"
+                            "pending" -> "Pending"
+                            else -> appointment.status
+                        }
+                    )
+                },
+                shape = RoundedCornerShape(12.dp),
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = when(appointment.status.lowercase()) {
+                        "confirmed" -> Color(0xFF4CAF50) // Green for Scheduled
+                        "pending" -> Color(0xFFFFA000) // Orange for Pending
+                        else -> Color.Gray
+                    }
+                )
+            )        }
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color(0xFF388E3C))

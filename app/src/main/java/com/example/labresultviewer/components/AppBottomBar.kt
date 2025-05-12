@@ -30,7 +30,7 @@ fun AppBottomBar(navController: NavController) {
             onClick = { navController.navigate(Screen.LabResults.route) }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Filled.CalendarMonth, contentDescription = "Appointments") },
+            icon = { Icon(Icons.Filled.CalendarMonth, contentDescription = "Appts") },
             label = { Text("Appointments") },
             selected = currentRoute == Screen.Appointments.route,
             onClick = { navController.navigate(Screen.Appointments.route) }
