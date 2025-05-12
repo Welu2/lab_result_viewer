@@ -60,9 +60,17 @@ fun PatientsScreen(
         patients
     } else {
         patients.filter { patient ->
-            patient.name.contains(searchQuery, ignoreCase = true) ||
-            patient.patientId.contains(searchQuery, ignoreCase = true) ||
-            patient.user.email.contains(searchQuery, ignoreCase = true)
+            val query = searchQuery.lowercase()
+            patient.name.lowercase().contains(query) ||
+            patient.patientId.lowercase().contains(query) ||
+            patient.user.email.lowercase().contains(query) ||
+            patient.dateOfBirth.contains(query) ||
+            patient.gender.lowercase().contains(query) ||
+            patient.bloodType.lowercase().contains(query) ||
+            (patient.phoneNumber?.lowercase()?.contains(query) ?: false) ||
+            (patient.relative?.lowercase()?.contains(query) ?: false) ||
+            patient.weight.toString().contains(query) ||
+            patient.height.toString().contains(query)
         }
     }
 
