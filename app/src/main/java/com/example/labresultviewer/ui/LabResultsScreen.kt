@@ -50,14 +50,29 @@ suspend fun downloadAndOpenPdf(
                 inputStream?.close()
 
                 withContext(Dispatchers.Main) {
-                    val uri = Uri.fromFile(file)
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.setDataAndType(uri, "application/pdf")
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    val uri = androidx.core.content.FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.provider",
+                        file
+                    )
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(uri, "application/pdf")
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
                     try {
                         context.startActivity(intent)
                     } catch (e: Exception) {
-                        Toast.makeText(context, "No app found to open PDF", Toast.LENGTH_LONG).show()
+                        // Try alternative method if the first one fails
+                        val alternativeIntent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(Uri.fromFile(file), "application/pdf")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        try {
+                            context.startActivity(alternativeIntent)
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "No app found to open PDF", Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
             } else {
