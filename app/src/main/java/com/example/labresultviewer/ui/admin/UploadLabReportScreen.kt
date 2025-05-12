@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,6 +43,15 @@ fun getFileFromUri(context: Context, uri: Uri): File? {
     } catch (e: Exception) {
         null
     }
+}
+
+fun getFileName(context: Context, uri: Uri): String {
+    val cursor = context.contentResolver.query(uri, null, null, null, null)
+    return cursor?.use {
+        val nameIndex = it.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+        it.moveToFirst()
+        it.getString(nameIndex)
+    } ?: "Unknown file"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,14 +104,20 @@ fun UploadLabReportScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { 
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(bottom = 80.dp)
+            ) 
+        },
         containerColor = Color(0xFFF5F5F5)
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(24.dp))
@@ -114,10 +130,32 @@ fun UploadLabReportScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.CloudUpload, contentDescription = null, tint = Color(0xFFB0B0B0), modifier = Modifier.size(48.dp))
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Tap to upload your report", color = Color(0xFFB0B0B0))
-                    Text("PDF, JPG or PNG", color = Color(0xFFB0B0B0), fontSize = 12.sp)
+                    if (selectedFileUri != null) {
+                        // Show PDF icon and filename when file is selected
+                        Icon(
+                            imageVector = Icons.Default.PictureAsPdf,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Selected: ${getFileName(context, selectedFileUri!!)}",
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    } else {
+                        // Show upload icon when no file is selected
+                        Icon(
+                            Icons.Default.CloudUpload,
+                            contentDescription = null,
+                            tint = Color(0xFFB0B0B0),
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Tap to upload your report", color = Color(0xFFB0B0B0))
+                        Text("PDF, JPG or PNG", color = Color(0xFFB0B0B0), fontSize = 12.sp)
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))

@@ -22,4 +22,13 @@ class AppointmentRepository @Inject constructor(private val apiService: ApiServi
     suspend fun deleteAppointment(token: String, id: Int): Response<Unit> {
         return apiService.deleteAppointment(token, id)
     }
+
+    suspend fun updateAppointment(token: String, id: Int, testType: String, date: String, time: String): Response<Appointment> {
+        val body = mapOf(
+            "testType" to testType,
+            "date" to date,
+            "time" to time
+        )
+        return apiService.updateAppointment(token, id, body)
+    }
 } 

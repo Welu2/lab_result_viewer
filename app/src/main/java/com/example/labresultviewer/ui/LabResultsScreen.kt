@@ -139,21 +139,8 @@ fun LabResultsScreen(viewModel: LabResultsViewModel) {
                                     }
                                 },
                                 onDownload = {
-                                    result.downloadUrl?.let { url ->
-                                        // Open the PDF in the browser or PDF viewer
-                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        try {
-                                            context.startActivity(intent)
-                                        } catch (e: Exception) {
-                                            coroutineScope.launch {
-                                                snackbarHostState.showSnackbar("No app found to open this file")
-                                            }
-                                        }
-                                    } ?: run {
-                                        coroutineScope.launch {
-                                            snackbarHostState.showSnackbar("No download link available")
-                                        }
+                                    coroutineScope.launch {
+                                        downloadAndOpenPdf(context, result.id, token)
                                     }
                                 },
                                 onCopyLink = {

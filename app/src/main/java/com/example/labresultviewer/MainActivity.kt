@@ -88,7 +88,9 @@ class MainActivity : ComponentActivity() {
             }
             composable(Screen.Success.route) {
                 SuccessScreen(
-                    onCompleteClick = { navController.navigate(Screen.CreateProfile.route) }
+                    onCompleteClick = { navController.navigate(Screen.CreateProfile.route) },
+                    sessionManager = sessionManager,
+                    navController = navController
                 )
             }
             composable(Screen.Login.route) {

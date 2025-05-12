@@ -251,4 +251,21 @@ class PatientViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateAppointment(id: Int, testType: String, date: String, time: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val token = sessionManager.getToken() ?: return@launch
+            try {
+                val response = appointmentRepository.updateAppointment("Bearer $token", id, testType, date, time)
+                if (response.isSuccessful) {
+                    loadUserAppointments()
+                    onResult(true)
+                } else {
+                    onResult(false)
+                }
+            } catch (e: Exception) {
+                onResult(false)
+            }
+        }
+    }
 }

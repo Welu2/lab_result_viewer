@@ -5,6 +5,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -12,50 +15,56 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.labresultviewer.data.SessionManager
 
 @Composable
 fun SuccessScreen(
-    onCompleteClick: () -> Unit
+    onCompleteClick: () -> Unit,
+    sessionManager: SessionManager,
+    navController: NavController
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    val userRole by sessionManager.userRole.collectAsState(initial = "user")
+
+    LaunchedEffect(Unit) {
+        // Navigate based on user role
+        when (userRole?.lowercase()) {
+            "admin" -> {
+                navController.navigate(Screen.AdminDashboard.route) {
+                    popUpTo(Screen.Success.route) { inclusive = true }
+                }
+            }
+            else -> {
+                onCompleteClick()
+            }
+        }
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = Icons.Filled.Check,
-            contentDescription = "Success",
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(200.dp)
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Successful",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(
-            text = "Fill in your personal information to simplify\ncommunication and book appointments faster",
-            fontSize = 12.sp,
-            color = Color.Gray,
-            lineHeight = 20.sp,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = onCompleteClick,
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text("Complete Patient Card")
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = "Success",
+                modifier = Modifier.size(100.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Account Created Successfully!",
+                style = MaterialTheme.typography.headlineMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Redirecting you to the appropriate screen...",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

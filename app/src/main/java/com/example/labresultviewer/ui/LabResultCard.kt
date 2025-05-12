@@ -94,7 +94,6 @@ fun LabResultCard(
                 }
                 OutlinedButton(
                     onClick = onDownload,
-                    enabled = !result.downloadUrl.isNullOrBlank(),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Download")

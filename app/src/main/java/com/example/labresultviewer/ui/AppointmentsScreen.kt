@@ -108,7 +108,9 @@ fun AppointmentsScreen(viewModel: PatientViewModel = hiltViewModel()) {
                 Button(
                     onClick = {
                         isReschedule = false; editIndex = -1
-                        selectedTest = ""; selectedTime = ""; selectedDate = "$day/${month+1}/$year"
+                        selectedTest = ""; selectedTime = ""
+                        // Format initial date as YYYY-MM-DD
+                        selectedDate = String.format("%04d-%02d-%02d", year, month + 1, day)
                         showScheduleDialog = true
                     },
                     shape = RoundedCornerShape(20.dp),
@@ -160,7 +162,8 @@ fun AppointmentsScreen(viewModel: PatientViewModel = hiltViewModel()) {
                 DatePickerDialog(
                     context,
                     { _: DatePicker, selYear, selMonth, selDay ->
-                        selectedDate = "$selDay/${selMonth + 1}/$selYear"
+                        // Format date as YYYY-MM-DD
+                        selectedDate = String.format("%04d-%02d-%02d", selYear, selMonth + 1, selDay)
                         showDatePicker = false
                     },
                     year, month, day
@@ -220,8 +223,22 @@ fun AppointmentsScreen(viewModel: PatientViewModel = hiltViewModel()) {
                         onClick = {
                             showScheduleDialog = false
                             if (selectedDate.isNotBlank() && selectedTime.isNotBlank() && (isReschedule || selectedTest.isNotBlank())) {
-                                // Call backend booking
-                                viewModel.bookAppointment(selectedTest, selectedDate, selectedTime)
+                                if (isReschedule) {
+                                    val apptId = appointments.getOrNull(editIndex)?.id
+                                    if (apptId != null) {
+                                        viewModel.updateAppointment(apptId, selectedTest, selectedDate, selectedTime) { success ->
+                                            if (success) {
+                                                showScheduleDialog = false
+                                            } else {
+                                                showErrorDialog = true
+                                            }
+                                        }
+                                    } else {
+                                        showErrorDialog = true
+                                    }
+                                } else {
+                                    viewModel.bookAppointment(selectedTest, selectedDate, selectedTime)
+                                }
                             } else {
                                 showErrorDialog = true
                             }

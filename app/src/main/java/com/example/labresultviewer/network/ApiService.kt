@@ -72,4 +72,11 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("id") id: Int
     ): Response<Unit>
+
+    @PATCH("/appointments/{id}")
+    suspend fun updateAppointment(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int,
+        @Body body: Map<String, String>
+    ): Response<Appointment>
 }

@@ -63,7 +63,7 @@ export class AppointmentService {
     }
     if (
       appointment.testType !== testType ||
-      appointment.date.toISOString().slice(0, 10) !== date ||
+      (appointment.date instanceof Date ? appointment.date.toISOString().slice(0, 10) : new Date(appointment.date).toISOString().slice(0, 10)) !== date ||
       appointment.time !== time
     ) {
       appointment.status = 'pending';
