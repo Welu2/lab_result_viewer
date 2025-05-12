@@ -3,6 +3,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -10,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,6 +31,7 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var rememberMe by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -119,18 +123,27 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = password,
-                    onValueChange = {
-                        password = it
-                        passwordError = it.isBlank()
-                        errorMessage = null
-                    },
-                    label = { Text("Password") },
-                    shape = RoundedCornerShape(18.dp),
-                    isError = passwordError,
-                    visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth()
-                )
+    value = password,
+    onValueChange = {
+        password = it
+        passwordError = it.isBlank()
+        errorMessage = null
+    },
+    label = { Text("Password") },
+    shape = RoundedCornerShape(18.dp),
+    isError = passwordError,
+    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+    modifier = Modifier.fillMaxWidth(),
+    trailingIcon = {
+        val image = if (passwordVisible)
+            Icons.Filled.Visibility
+        else Icons.Filled.VisibilityOff
+
+        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+            Icon(imageVector = image, contentDescription = if (passwordVisible) "Hide password" else "Show password")
+        }
+    }
+)
 
                 if (passwordError) {
                     Text("Password is required", color = Color.Red, fontSize = 12.sp)

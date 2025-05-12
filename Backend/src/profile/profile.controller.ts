@@ -13,6 +13,7 @@ import {
 import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdateEmailDto } from './dto/update-email.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 
@@ -49,6 +50,14 @@ export class ProfileController {
       throw new ForbiddenException('Access denied');
     }
     return profile;
+  }
+
+  @Patch('update-email')
+  async updateEmail(
+    @Body() updateEmailDto: UpdateEmailDto,
+    @Request() req,
+  ) {
+    return this.profileService.updateEmail(req.user.id, updateEmailDto);
   }
 
   @Patch(':id')

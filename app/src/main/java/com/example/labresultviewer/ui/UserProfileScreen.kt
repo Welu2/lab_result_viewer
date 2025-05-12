@@ -1,5 +1,7 @@
 package com.example.labresultviewer.ui
 
+import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,7 +25,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.labresultviewer.ui.admin.EditPatientModal
+import com.example.labresultviewer.viewmodel.UserProfileViewModel
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
@@ -33,11 +39,29 @@ fun UserProfileScreen(
     onNotificationSetting: () -> Unit,
     onLogout: () -> Unit,
     onDeleteProfile: () -> Boolean,
-    profileImageUrl: String? = null // If you have image, otherwise null
+    profileImageUrl: String? = null,
+    viewModel: UserProfileViewModel = hiltViewModel()
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showEmailChangeModal by remember { mutableStateOf(false) }
+    var showEditProfileModal by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val emailChangeState by viewModel.emailChangeState.collectAsState()
+
+    // Handle email change result
+    LaunchedEffect(emailChangeState) {
+        emailChangeState.getOrNull()?.let { success ->
+            if (success) {
+                Toast.makeText(context, "Email changed successfully", Toast.LENGTH_SHORT).show()
+                showEmailChangeModal = false
+            }
+        }
+        emailChangeState.exceptionOrNull()?.let { error ->
+            Toast.makeText(context, "Failed to change email: ${error.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,6 +77,7 @@ fun UserProfileScreen(
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(2.dp),
             modifier = Modifier.fillMaxWidth()
+                .clickable { showEditProfileModal = true }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -92,7 +117,7 @@ fun UserProfileScreen(
         ProfileActionItem(
             icon = Icons.Default.Email,
             text = "Change Email",
-            onClick = onChangeEmail
+            onClick = { showEmailChangeModal = true }
         )
         ProfileActionItem(
             icon = Icons.Default.Notifications,
@@ -116,6 +141,19 @@ fun UserProfileScreen(
                 .padding(vertical = 12.dp)
         )
         Divider()
+    }
+
+    // Email Change Modal
+    if (showEmailChangeModal) {
+        EmailChangeModal(
+            currentEmail = viewModel.profile.value?.user?.email ?: "",
+            onDismiss = { showEmailChangeModal = false },
+            onEmailChange = { newEmail, password ->
+                viewModel.changeEmail(newEmail, password)
+            }
+        )
+    }
+
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
@@ -179,6 +217,15 @@ fun UserProfileScreen(
         )
     }
 
+    if (showEditProfileModal && viewModel.profile.value != null) {
+        EditPatientModal(
+            patient = viewModel.profile.value!!,
+            onDismiss = { showEditProfileModal = false },
+            onEdit = { updatedFields ->
+                viewModel.updateProfile(updatedFields)
+                showEditProfileModal = false
+            }
+        )
     }
 }
 

@@ -10,6 +10,8 @@ interface UserRepository {
     suspend fun getProfile(authHeader: String): UserProfile
     suspend fun getTestResults(patientId: String): List<TestResult>
     suspend fun deleteProfile(profileId: Int, authHeader: String): Response<Unit>
+    suspend fun updateProfile(token: String, profileId: Int, profileData: Map<String, String>): Response<UserProfile>
+    suspend fun updateEmail(token: String, email: String, password: String): Response<UserProfile>
 }
 
 class UserRepositoryImpl @Inject constructor(
@@ -31,5 +33,16 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun deleteProfile(profileId: Int, authHeader: String): Response<Unit> {
         return apiService.deleteProfile(authHeader, profileId)
+    }
+
+    override suspend fun updateProfile(token: String, profileId: Int, profileData: Map<String, String>): Response<UserProfile> {
+        return apiService.updateProfile(token, profileId, profileData)
+    }
+
+    override suspend fun updateEmail(token: String, email: String, password: String): Response<UserProfile> {
+        return apiService.updateEmail(token, mapOf(
+            "email" to email,
+            "password" to password
+        ))
     }
 }

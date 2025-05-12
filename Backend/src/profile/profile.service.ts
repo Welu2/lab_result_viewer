@@ -3,14 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdateEmailDto } from './dto/update-email.dto';
 import { Profile } from './entities/profile.entity';
 import { User } from 'src/users/user.entity';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ProfileService {
   constructor(
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
+    private readonly usersService: UsersService
   ) {}
 
   async create(data: CreateProfileDto & { user: User }) {
@@ -80,6 +83,25 @@ export class ProfileService {
     }
 
     return profile;
+  }
+
+  async updateEmail(userId: number, updateEmailDto: UpdateEmailDto) {
+    const profile = await this.findByUserId(userId);
+    if (!profile.user.patientId) {
+      throw new NotFoundException('User patientId not found');
+    }
+    const updatedUser = await this.usersService.updateUser(
+      profile.user.patientId,
+      profile.user,
+      updateEmailDto.email,
+      updateEmailDto.password
+    );
+  
+    if (!updatedUser) {
+      throw new NotFoundException('Failed to update email');
+    }
+  
+    return this.findByUserId(userId);
   }
 }
 

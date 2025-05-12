@@ -220,7 +220,7 @@ class MainActivity : ComponentActivity() {
                     UserProfileScreen(
                         userName = profile?.name ?: "User",
                         dob = profile?.dateOfBirth ?: "",
-                        onChangeEmail = { /* navController.navigate("change_email") */ },
+                        onChangeEmail = {},
                         onNotificationSetting = { /* navController.navigate("notification_settings") */ },
                         onLogout = {
                             userProfileViewModel.logout()
@@ -241,7 +241,8 @@ class MainActivity : ComponentActivity() {
                             }
                             true
                         },
-                        profileImageUrl = null
+                        profileImageUrl = null,
+                        viewModel = userProfileViewModel
                     )
                 }
             }

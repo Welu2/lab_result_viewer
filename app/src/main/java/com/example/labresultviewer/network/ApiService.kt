@@ -56,6 +56,12 @@ interface ApiService {
         @Body profileData: Map<String, String>
     ): Response<UserProfile>
 
+    @PATCH("/profile/update-email")
+    suspend fun updateEmail(
+        @Header("Authorization") token: String,
+        @Body emailData: Map<String, String>
+    ): Response<UserProfile>
+
     @POST("/appointments")
     suspend fun bookAppointment(
         @Header("Authorization") token: String,

@@ -111,7 +111,7 @@ fun DashboardScreen(
                         }
                     }
                     Spacer(Modifier.height(8.dp))
-                    TextButton(onClick = { /* TODO: Navigate to all appointments */ }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                    TextButton(onClick = { navController.navigate(Screen.AppointmentsScreen.route) }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
                         Text("View All Appointments", color = Color(0xFF3B5BDB))
                     }
                 }

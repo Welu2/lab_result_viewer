@@ -65,12 +65,7 @@ fun PatientsScreen(
             patient.patientId.lowercase().contains(query) ||
             patient.user.email.lowercase().contains(query) ||
             patient.dateOfBirth.contains(query) ||
-            patient.gender.lowercase().contains(query) ||
-            patient.bloodType.lowercase().contains(query) ||
-            (patient.phoneNumber?.lowercase()?.contains(query) ?: false) ||
-            (patient.relative?.lowercase()?.contains(query) ?: false) ||
-            patient.weight.toString().contains(query) ||
-            patient.height.toString().contains(query)
+            patient.bloodType.lowercase().contains(query)
         }
     }
 
